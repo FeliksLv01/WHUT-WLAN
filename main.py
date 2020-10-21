@@ -29,7 +29,7 @@ def login_request(username, password):
             if "login_ok" in response.text:
                 logging.info("login successfully")
             else:
-                logging.error("login failed")
+                logging.error(response.text)
         except:
             logging.exception("requsest error")
     else:
@@ -86,7 +86,7 @@ def heading():
 if __name__ == "__main__":
     heading()
     args = sys.argv
-    username = args[0]
-    password = args[1]
+    username = args[1]
+    password = args[2]
     login_request(username, password)
-    # logout(username, password)
+    #logout(username, password)
