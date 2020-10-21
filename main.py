@@ -23,8 +23,17 @@ def login_request(username, password):
                 "ac_id": ac_id,
                 "save_me": 1,
                 "ajax": 1}
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36',
+            'accept-encoding': 'gzip, deflate',
+            'Cache-Control': 'max-age=0',
+            'Connection': 'keep-alive',
+            'accept-language': 'zh-CN,zh-TW;q=0.8,zh;q=0.6,en;q=0.4,ja;q=0.2',
+            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+            'X-Requested-With': 'XMLHttpRequest',
+        }
         try:
-            response = requests.post(REQUEST_URL, data=data)
+            response = requests.post(REQUEST_URL, data=data, headers=headers)
             response.encoding = response.apparent_encoding
             if "login_ok" in response.text:
                 logging.info("login successfully")

@@ -12,7 +12,11 @@
 
 ## 使用方法
 
-安装 requests
+安装依赖（目前只有requests
+
+```shell
+sudo -H pip3 install -r requirements.txt
+```
 
 ```shell
 python3 main.py yourNumber yourpassword
