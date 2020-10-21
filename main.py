@@ -3,6 +3,9 @@ import logging
 import requests
 import base64
 import re
+import sys
+BLUE, END = '\033[1;36m', '\033[0m'
+
 REQUEST_URL = "http://172.30.16.34/include/auth_action.php"
 logging.basicConfig(level=logging.INFO,
                     format='%(levelname)s: %(asctime)s ====> %(message)s')
@@ -69,6 +72,21 @@ def logout(username, password):
     logging.info(response.text)
 
 
+def heading():
+    str = r"""
+ _       ____  ____  ________  _       ____    ___    _   __
+| |     / / / / / / / /_  __/ | |     / / /   /   |  / | / /
+| | /| / / /_/ / / / / / /____| | /| / / /   / /| | /  |/ /
+| |/ |/ / __  / /_/ / / /_____/ |/ |/ / /___/ ___ |/ /|  /
+|__/|__/_/ /_/\____/ /_/      |__/|__/_____/_/  |_/_/ |_/
+"""
+    sys.stdout.write(BLUE+str+END + '\n')
+
+
 if __name__ == "__main__":
-    login_request("", "")
-    #logout("", "")
+    heading()
+    args = sys.argv
+    username = args[0]
+    password = args[1]
+    login_request(username, password)
+    # logout(username, password)

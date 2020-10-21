@@ -10,6 +10,14 @@
 |__/|__/_/ /_/\____/ /_/      |__/|__/_____/_/  |_/_/ |_/
 ```
 
+## 使用方法
+
+安装 requests
+
+```shell
+python3 main.py yourNumber yourpassword
+```
+
 ## 测试中
 
 - 鉴湖可用
