@@ -39,7 +39,7 @@ def login_request(username, password):
                 logging.info("login successfully")
             else:
                 logging.error(response.text)
-        except:
+        except Exception:
             logging.exception("requsest error")
     else:
         logging.info("your computer is online  ")
