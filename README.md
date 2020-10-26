@@ -25,3 +25,4 @@ python3 main.py yourNumber yourpassword
 ## 测试中
 
 - 鉴湖可用
+- 南湖仅测试新一

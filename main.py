@@ -7,24 +7,26 @@ import sys
 BLUE, END = '\033[1;36m', '\033[0m'
 
 REQUEST_URL = "http://172.30.16.34/include/auth_action.php"
-logging.basicConfig(level=logging.INFO,
-                    format='%(levelname)s: %(asctime)s ====> %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(asctime)s ====> %(message)s')
 
 
 def login_request(username, password):
     # rawPassword = password
     if not is_net_ok():
         logging.info("your computer is offline ， request now... ")
-        password = "{B}"+base64.b64encode(password.encode()).decode()  # 加密
+        password = "{B}" + base64.b64encode(password.encode()).decode()  # 加密
         ac_id = getAcId()
-        data = {"action": "login",
-                "username": username,
-                "password": password,
-                "ac_id": ac_id,
-                "save_me": 1,
-                "ajax": 1}
+        data = {
+            "action": "login",
+            "username": username,
+            "password": password,
+            "ac_id": ac_id,
+            "save_me": 1,
+            "ajax": 1
+        }
         headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36',
+            'User-Agent':
+            'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36',
             'accept-encoding': 'gzip, deflate',
             'Cache-Control': 'max-age=0',
             'Connection': 'keep-alive',
@@ -59,23 +61,20 @@ def is_net_ok() -> bool:
 # 获取ac_id
 def getAcId() -> int:
     response = requests.get('http://hao123.com')
-    url = re.findall(
-        r"<meta http-equiv='refresh' content='1; url=(.*?)'>", response.text, re.S)[0]
+    url = re.findall(r"<meta http-equiv='refresh' content='1; url=(.*?)'>", response.text, re.S)[0]
     url = requests.get(url).url
-    url = url.replace('index_1.html', 'srun_portal_pc.php')
+    numStr = re.findall(r"index_(.*?).html", url)[0]
+    url = url.replace('index_' + numStr + '.html', 'srun_portal_pc.php?c_id=' + numStr)
     response = requests.get(url)
-    ac_id_str = re.findall(
-        r'<input type="hidden" name="ac_id" value="(.*?)">', response.text, re.S)[0]
+    ac_id_str = re.findall(r'<input type="hidden" name="ac_id" value="(.*?)">', response.text,
+                           re.S)[0]
     ac_id = int(ac_id_str)
     return ac_id
 
 
 # password必须为编码之前的密码
 def logout(username, password):
-    postData = {"action": "logout",
-                "username": username,
-                "password": password,
-                "ajax": 1}
+    postData = {"action": "logout", "username": username, "password": password, "ajax": 1}
     response = requests.post(REQUEST_URL, data=postData)
     response.encoding = response.apparent_encoding
     logging.info(response.text)
@@ -89,7 +88,7 @@ def heading():
 | |/ |/ / __  / /_/ / / /_____/ |/ |/ / /___/ ___ |/ /|  /
 |__/|__/_/ /_/\____/ /_/      |__/|__/_____/_/  |_/_/ |_/
 """
-    sys.stdout.write(BLUE+str+END + '\n')
+    sys.stdout.write(BLUE + str + END + '\n')
 
 
 if __name__ == "__main__":
