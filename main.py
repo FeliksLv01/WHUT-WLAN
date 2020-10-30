@@ -4,6 +4,8 @@ import requests
 import base64
 import re
 import sys
+import os
+
 BLUE, END = '\033[1;36m', '\033[0m'
 
 REQUEST_URL = "http://172.30.16.34/include/auth_action.php"
@@ -39,6 +41,9 @@ def login_request(username, password):
             response.encoding = response.apparent_encoding
             if "login_ok" in response.text:
                 logging.info("login successfully")
+                ip = os.popen(
+                    '/sbin/ifconfig -a|grep inet|grep -v 127.0.0.1|grep -v inet6|awk \'{print $2}\'|tr -d \"addr:\"').read()
+                logging.info("your ip: "+ip)
             else:
                 logging.error(response.text)
         except Exception:
