@@ -22,6 +22,8 @@ sudo -H pip3 install -r requirements.txt
 python3 main.py yourNumber yourpassword
 ```
 
+RasberryPi文件夹下面是在树莓派下运行的python代码以及启动脚本，自动登陆并将ip发送到指定邮箱
+
 ## 测试中
 
 - 鉴湖可用
