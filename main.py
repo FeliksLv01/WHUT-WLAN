@@ -65,7 +65,7 @@ def is_net_ok() -> bool:
 
 # 获取ac_id
 def getAcId() -> int:
-    response = requests.get('http://hao123.com')
+    response = requests.get('http://blog.kcqnly.club')
     url = re.findall(r"<meta http-equiv='refresh' content='1; url=(.*?)'>", response.text, re.S)[0]
     url = requests.get(url).url
     numStr = re.findall(r"index_(.*?).html", url)[0]
