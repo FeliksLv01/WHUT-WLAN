@@ -5,6 +5,7 @@ import base64
 import re
 import sys
 import os
+import time
 
 BLUE, END = '\033[1;36m', '\033[0m'
 
@@ -12,7 +13,7 @@ REQUEST_URL = "http://172.30.16.34/include/auth_action.php"
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(asctime)s ====> %(message)s')
 
 
-def login_request(username, password):
+def login_request(username, password) -> bool:
     # rawPassword = password
     if not is_net_ok():
         logging.info("your computer is offline ， request now... ")
@@ -101,5 +102,15 @@ if __name__ == "__main__":
     args = sys.argv
     username = args[1]
     password = args[2]
-    login_request(username, password)
+    while True:
+        try:
+            login_request(username, password)
+            break
+        except:
+            logging.exception("Connection refused by the server..")
+            logging.exception("Let me sleep for 5 seconds")
+            logging.info("ZZzzzz...")
+            time.sleep(5)
+            logging.info("Was a nice sleep, now let me continue...")
+            continue
     #logout(username, password)
