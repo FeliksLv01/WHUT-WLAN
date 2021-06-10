@@ -4,14 +4,13 @@ import requests
 import base64
 import re
 import sys
-import os
 import time
+import socket
 
 BLUE, END = '\033[1;36m', '\033[0m'
 
 REQUEST_URL = "http://172.30.16.34/include/auth_action.php"
-logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(asctime)s ====> %(message)s',
-                    datefmt='%Y-%m-%d %H:%M:%S')
+logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(asctime)s ====> %(message)s')
 
 
 def login_request(username, password) -> bool:
@@ -43,8 +42,7 @@ def login_request(username, password) -> bool:
             response.encoding = response.apparent_encoding
             if "login_ok" in response.text:
                 logging.info("login successfully")
-                ip = os.popen(
-                    '/sbin/ifconfig -a|grep inet|grep -v 127.0.0.1|grep -v inet6|awk \'{print $2}\'|tr -d \"addr:\"').read()
+                ip = get_host_ip()
                 logging.info("your ip: "+ip)
             else:
                 logging.error(response.text)
@@ -52,6 +50,8 @@ def login_request(username, password) -> bool:
             logging.exception("requsest error")
     else:
         logging.info("your computer is online  ")
+        ip = get_host_ip()
+        logging.info("your ip: "+ip)
 
 
 def is_net_ok() -> bool:
@@ -65,9 +65,19 @@ def is_net_ok() -> bool:
         return False
 
 
+def get_host_ip():
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(('8.8.8.8', 80))
+        ip = s.getsockname()[0]
+    finally:
+        s.close()
+    return ip
+
+
 # 获取ac_id
 def getAcId() -> int:
-    response = requests.get('http://blog.kcqnly.club')
+    response = requests.get('http://1.1.1.1')
     url = re.findall(r"<meta http-equiv='refresh' content='1; url=(.*?)'>", response.text, re.S)[0]
     url = requests.get(url).url
     numStr = re.findall(r"index_(.*?).html", url)[0]
