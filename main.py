@@ -10,7 +10,8 @@ import time
 BLUE, END = '\033[1;36m', '\033[0m'
 
 REQUEST_URL = "http://172.30.16.34/include/auth_action.php"
-logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(asctime)s ====> %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(asctime)s ====> %(message)s',
+                    datefmt='%Y-%m-%d %H:%M:%S')
 
 
 def login_request(username, password) -> bool:
