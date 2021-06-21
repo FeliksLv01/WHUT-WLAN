@@ -16,7 +16,7 @@ logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(asctime)s ====>
 def login_request(username, password) -> bool:
     # rawPassword = password
     if not is_net_ok():
-        logging.info("your computer is offline ， request now... ")
+        logging.info("your computer is offline，request now...")
         password = "{B}" + base64.b64encode(password.encode()).decode()  # 加密
         ac_id = getAcId()
         data = {
