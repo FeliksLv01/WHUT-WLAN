@@ -77,7 +77,7 @@ def get_host_ip():
 
 # 获取ac_id
 def getAcId() -> int:
-    response = requests.get('http://1.1.1.1')
+    response = requests.get('http://hao123.com')
     url = re.findall(r"<meta http-equiv='refresh' content='1; url=(.*?)'>", response.text, re.S)[0]
     url = requests.get(url).url
     numStr = re.findall(r"index_(.*?).html", url)[0]
