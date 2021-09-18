@@ -14,11 +14,13 @@ logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(asctime)s ====>
 
 
 def login_request(username, password) -> bool:
-    # rawPassword = password
     if not is_net_ok():
         logging.info("your computer is offline，request now...")
         password = "{B}" + base64.b64encode(password.encode()).decode()  # 加密
         ac_id = getAcId()
+        if ac_id == -1:
+            logging.error('校园网异常...')
+            return False
         data = {
             "action": "login",
             "username": username,
@@ -77,14 +79,20 @@ def get_host_ip():
 
 # 获取ac_id
 def getAcId() -> int:
-    response = requests.get('http://hao123.com')
-    url = re.findall(r"<meta http-equiv='refresh' content='1; url=(.*?)'>", response.text, re.S)[0]
+    response = requests.get('http://edge.microsoft.com/captiveportal/generate_204?cmd=redirect&arubalp=12345')
+    match_list = re.findall(r"<meta http-equiv='refresh' content='1; url=(.*?)'>", response.text, re.S)
+    if len(match_list) == 0:
+        url = response.url
+    else:
+        url = match_list[0]
     url = requests.get(url).url
     numStr = re.findall(r"index_(.*?).html", url)[0]
-    url = url.replace('index_' + numStr + '.html', 'srun_portal_pc.php?c_id=' + numStr)
+    url = url.replace('index_' + numStr + '.html', 'srun_portal_pc.php?ac_id=' + numStr)
     response = requests.get(url)
-    ac_id_str = re.findall(r'<input type="hidden" name="ac_id" value="(.*?)">', response.text,
-                           re.S)[0]
+    match_list = re.findall(r'<input type="hidden" name="ac_id" value="(.*?)">', response.text, re.S)
+    if len(match_list) == 0:
+        return -1
+    ac_id_str = match_list[0]
     ac_id = int(ac_id_str)
     return ac_id
 
