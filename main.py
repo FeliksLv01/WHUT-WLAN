@@ -11,6 +11,8 @@ BLUE, END = '\033[1;36m', '\033[0m'
 
 REQUEST_URL = "http://172.30.16.34/include/auth_action.php"
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(asctime)s ====> %(message)s')
+session = requests.Session()
+session.trust_env = False
 
 
 def login_request(username, password) -> bool:
@@ -40,7 +42,7 @@ def login_request(username, password) -> bool:
             'X-Requested-With': 'XMLHttpRequest',
         }
         try:
-            response = requests.post(REQUEST_URL, data=data, headers=headers)
+            response = session.post(REQUEST_URL, data=data, headers=headers)
             response.encoding = response.apparent_encoding
             if "login_ok" in response.text:
                 logging.info("login successfully")
@@ -58,7 +60,7 @@ def login_request(username, password) -> bool:
 
 def is_net_ok() -> bool:
     try:
-        status = requests.get("https://www.baidu.com").status_code
+        status = session.get("https://www.baidu.com").status_code
         if status == 200:
             return True
         else:
@@ -79,16 +81,16 @@ def get_host_ip():
 
 # 获取ac_id
 def getAcId() -> int:
-    response = requests.get('http://edge.microsoft.com/captiveportal/generate_204?cmd=redirect&arubalp=12345')
+    response = session.get('http://edge.microsoft.com/captiveportal/generate_204?cmd=redirect&arubalp=12345')
     match_list = re.findall(r"<meta http-equiv='refresh' content='1; url=(.*?)'>", response.text, re.S)
     if len(match_list) == 0:
         url = response.url
     else:
         url = match_list[0]
-    url = requests.get(url).url
+    url = session.get(url).url
     numStr = re.findall(r"index_(.*?).html", url)[0]
     url = url.replace('index_' + numStr + '.html', 'srun_portal_pc.php?ac_id=' + numStr)
-    response = requests.get(url)
+    response = session.get(url)
     match_list = re.findall(r'<input type="hidden" name="ac_id" value="(.*?)">', response.text, re.S)
     if len(match_list) == 0:
         return -1
@@ -100,7 +102,7 @@ def getAcId() -> int:
 # password必须为编码之前的密码
 def logout(username, password):
     postData = {"action": "logout", "username": username, "password": password, "ajax": 1}
-    response = requests.post(REQUEST_URL, data=postData)
+    response = session.post(REQUEST_URL, data=postData)
     response.encoding = response.apparent_encoding
     logging.info(response.text)
 
