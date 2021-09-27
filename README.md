@@ -15,7 +15,7 @@
 安装依赖（目前只有 requests
 
 ```shell
-sudo -H pip3 install -r requirements.txt
+pip3 install requests
 ```
 
 ```shell
