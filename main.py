@@ -83,13 +83,10 @@ def get_host_ip():
 def getAcId() -> int:
     response = session.get('http://edge.microsoft.com/captiveportal/generate_204?cmd=redirect&arubalp=12345')
     match_list = re.findall(r"<meta http-equiv='refresh' content='1; url=(.*?)'>", response.text, re.S)
-    if len(match_list) == 0:
-        url = response.url
-    else:
-        url = match_list[0]
+    url = response.url
     url = session.get(url).url
     numStr = re.findall(r"index_(.*?).html", url)[0]
-    url = url.replace('index_' + numStr + '.html', 'srun_portal_pc.php?ac_id=' + numStr)
+    url = url.replace('index_' + numStr + '.html?', 'srun_portal_pc.php?ac_id=' + numStr)
     response = session.get(url)
     match_list = re.findall(r'<input type="hidden" name="ac_id" value="(.*?)">', response.text, re.S)
     if len(match_list) == 0:
