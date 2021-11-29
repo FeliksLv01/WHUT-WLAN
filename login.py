@@ -1,5 +1,6 @@
 # coding:utf-8
 import logging
+from os import device_encoding
 import requests
 import base64
 import re
@@ -13,7 +14,7 @@ REQUEST_URL = "http://172.30.16.34/include/auth_action.php"
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(asctime)s ====> %(message)s')
 session = requests.Session()
 session.trust_env = False
-
+device_type = '-pc'
 
 def login_request(username, password) -> bool:
     if not is_net_ok():
@@ -31,7 +32,17 @@ def login_request(username, password) -> bool:
             "save_me": 1,
             "ajax": 1
         }
-        headers = {
+        headersPC = {
+            'User-Agent':
+            'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36',
+            'accept-encoding': 'gzip, deflate',
+            'Cache-Control': 'max-age=0',
+            'Connection': 'keep-alive',
+            'accept-language': 'zh-CN,zh-TW;q=0.8,zh;q=0.6,en;q=0.4,ja;q=0.2',
+            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+            'X-Requested-With': 'XMLHttpRequest',
+        }
+        headersMobile = {
             'User-Agent':
             'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.55 Mobile Safari/537.36',
             'accept-encoding': 'gzip, deflate',
@@ -42,7 +53,12 @@ def login_request(username, password) -> bool:
             'X-Requested-With': 'XMLHttpRequest',
         }
         try:
-            response = session.post(REQUEST_URL, data=data, headers=headers)
+            if(device_type == '-pc'):
+                response = session.post(REQUEST_URL, data=data, headers = headersPC)
+                #print('login pc')
+            else:
+                response = session.post(REQUEST_URL, data=data, headers = headersMobile)
+                #print('login mobile')
             response.encoding = response.apparent_encoding
             if "login_ok" in response.text:
                 logging.info("login successfully")
@@ -83,13 +99,13 @@ def get_host_ip():
 def getAcId() -> int:
     response = session.get('http://edge.microsoft.com/captiveportal/generate_204?cmd=redirect&arubalp=12345')
     match_list = re.findall(r"<meta http-equiv='refresh' content='1; url=(.*?)'>", response.text, re.S)
-    if len(match_list) == 0:
-        url = response.url
-    else:
-        url = match_list[0]
+    url = response.url
     url = session.get(url).url
     numStr = re.findall(r"index_(.*?).html", url)[0]
-    url = url.replace('index_' + numStr + '.html', 'srun_portal_phone.php?ac_id=' + numStr)
+    if(device_type == '-pc'):
+        url = url.replace('index_' + numStr + '.html?', 'srun_portal_pc.php?ac_id=' + numStr)
+    else:
+        url = url.replace('index_' + numStr + '.html?', 'srun_portal_phone.php?ac_id=' + numStr)
     response = session.get(url)
     match_list = re.findall(r'<input type="hidden" name="ac_id" value="(.*?)">', response.text, re.S)
     if len(match_list) == 0:
@@ -119,10 +135,18 @@ def heading():
 
 
 if __name__ == "__main__":
-    #heading()
+    heading()
     args = sys.argv
     username = args[1]
     password = args[2]
+    try:
+        device_type = args[3]
+        if device_type == '-pc':
+            print('login as PC.')
+        else:
+            print('login as mobile.')
+    except:
+        print('login as PC.')
     while True:
         try:
             login_request(username, password)
