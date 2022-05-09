@@ -10,8 +10,10 @@ import socket
 
 BLUE, END = '\033[1;36m', '\033[0m'
 
-REQUEST_URL = "http://172.30.16.34/include/auth_action.php"
+requesr_url = ''
+
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(asctime)s ====> %(message)s')
+
 session = requests.Session()
 session.trust_env = False
 device_type = '-pc'
@@ -21,6 +23,7 @@ def login_request(username, password) -> bool:
         logging.info("your computer is offline，request now...")
         password = "{B}" + base64.b64encode(password.encode()).decode()  # 加密
         ac_id = getAcId()
+        # logging.info( 'ac_id: ' + str(ac_id))
         if ac_id == -1:
             logging.error('校园网异常...')
             return False
@@ -54,10 +57,10 @@ def login_request(username, password) -> bool:
         }
         try:
             if(device_type == '-pc'):
-                response = session.post(REQUEST_URL, data=data, headers = headersPC)
+                response = session.post(requesr_url, data=data, headers = headersPC)
                 #print('login pc')
             else:
-                response = session.post(REQUEST_URL, data=data, headers = headersMobile)
+                response = session.post(requesr_url, data=data, headers = headersMobile)
                 #print('login mobile')
             response.encoding = response.apparent_encoding
             if "login_ok" in response.text:
@@ -97,8 +100,8 @@ def get_host_ip():
 
 # 获取ac_id
 def getAcId() -> int:
-    response = session.get('http://edge.microsoft.com/captiveportal/generate_204?cmd=redirect&arubalp=12345')
-    match_list = re.findall(r"<meta http-equiv='refresh' content='1; url=(.*?)'>", response.text, re.S)
+    response = session.get('http://www.msftconnecttest.com/redirect?cmd=redirect&arubalp=12345')
+    # match_list = re.findall(r"<meta http-equiv='refresh' content='1; url=(.*?)'>", response.text, re.S)
     url = response.url
     url = session.get(url).url
     numStr = re.findall(r"index_(.*?).html", url)[0]
@@ -107,6 +110,8 @@ def getAcId() -> int:
     else:
         url = url.replace('index_' + numStr + '.html?', 'srun_portal_phone.php?ac_id=' + numStr)
     response = session.get(url)
+    global requesr_url
+    requesr_url = 'http://' + re.findall(r'http://(.*?)/srun', url, re.S)[0] +  '/include/auth_action.php'
     match_list = re.findall(r'<input type="hidden" name="ac_id" value="(.*?)">', response.text, re.S)
     if len(match_list) == 0:
         return -1
@@ -118,7 +123,7 @@ def getAcId() -> int:
 # password必须为编码之前的密码
 def logout(username, password):
     postData = {"action": "logout", "username": username, "password": password, "ajax": 1}
-    response = session.post(REQUEST_URL, data=postData)
+    response = session.post(requesr_url, data=postData)
     response.encoding = response.apparent_encoding
     logging.info(response.text)
 
@@ -142,11 +147,11 @@ if __name__ == "__main__":
     try:
         device_type = args[3]
         if device_type == '-pc':
-            print('login as PC.')
+            logging.info('login as PC.')
         else:
-            print('login as mobile.')
+            logging.info('login as mobile.')
     except:
-        print('login as PC.')
+        logging.info('login as PC.')
     while True:
         try:
             login_request(username, password)
