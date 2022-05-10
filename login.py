@@ -1,6 +1,5 @@
 # coding:utf-8
 import logging
-from os import device_encoding
 import requests
 import base64
 import re
@@ -16,7 +15,8 @@ logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(asctime)s ====>
 
 session = requests.Session()
 session.trust_env = False
-device_type = '-pc'
+is_login_as_pc = True
+
 
 def login_request(username, password) -> bool:
     if not is_net_ok():
@@ -35,7 +35,7 @@ def login_request(username, password) -> bool:
             "save_me": 1,
             "ajax": 1
         }
-        headersPC = {
+        headers = {
             'User-Agent':
             'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36',
             'accept-encoding': 'gzip, deflate',
@@ -45,23 +45,10 @@ def login_request(username, password) -> bool:
             'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
             'X-Requested-With': 'XMLHttpRequest',
         }
-        headersMobile = {
-            'User-Agent':
-            'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.55 Mobile Safari/537.36',
-            'accept-encoding': 'gzip, deflate',
-            'Cache-Control': 'max-age=0',
-            'Connection': 'keep-alive',
-            'accept-language': 'zh,zh-CN;q=0.9,en-US;q=0.8,en;q=0.7,ja;q=0.6',
-            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-            'X-Requested-With': 'XMLHttpRequest',
-        }
+        if not is_login_as_pc:
+            headers['User-Agent'] = 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.55 Mobile Safari/537.36',
         try:
-            if(device_type == '-pc'):
-                response = session.post(requesr_url, data=data, headers = headersPC)
-                #print('login pc')
-            else:
-                response = session.post(requesr_url, data=data, headers = headersMobile)
-                #print('login mobile')
+            response = session.post(requesr_url, data=data, headers=headers)
             response.encoding = response.apparent_encoding
             if "login_ok" in response.text:
                 logging.info("login successfully")
@@ -105,13 +92,13 @@ def getAcId() -> int:
     url = response.url
     url = session.get(url).url
     numStr = re.findall(r"index_(.*?).html", url)[0]
-    if(device_type == '-pc'):
+    if is_login_as_pc:
         url = url.replace('index_' + numStr + '.html?', 'srun_portal_pc.php?ac_id=' + numStr)
     else:
         url = url.replace('index_' + numStr + '.html?', 'srun_portal_phone.php?ac_id=' + numStr)
     response = session.get(url)
     global requesr_url
-    requesr_url = 'http://' + re.findall(r'http://(.*?)/srun', url, re.S)[0] +  '/include/auth_action.php'
+    requesr_url = 'http://' + re.findall(r'http://(.*?)/srun', url, re.S)[0] + '/include/auth_action.php'
     match_list = re.findall(r'<input type="hidden" name="ac_id" value="(.*?)">', response.text, re.S)
     if len(match_list) == 0:
         return -1
@@ -145,10 +132,10 @@ if __name__ == "__main__":
     username = args[1]
     password = args[2]
     try:
-        device_type = args[3]
-        if device_type == '-pc':
+        if args[3] == '-pc':
             logging.info('login as PC.')
         else:
+            is_login_as_pc = False
             logging.info('login as mobile.')
     except:
         logging.info('login as PC.')
