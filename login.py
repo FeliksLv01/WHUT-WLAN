@@ -17,9 +17,39 @@ logging.basicConfig(level=logging.INFO,
 session = requests.Session()
 session.trust_env = False
 
+def log_out():
+    default_request_host_url = 'http://172.30.21.100/'
+    try:
+        with open('request_host_url.txt', 'w') as f:
+            request_host_url = f.readline()
+    except:
+        request_host_url = default_request_host_url
+    headers = {
+        'User-Agent':
+        'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36',
+        'accept-encoding': 'gzip, deflate',
+        'Cache-Control': 'max-age=0',
+        'Connection': 'keep-alive',
+        'accept-language': 'zh-CN,zh-TW;q=0.8,zh;q=0.6,en;q=0.4,ja;q=0.2',
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        'X-Requested-With': 'XMLHttpRequest',
+    }
+
+    params = {
+        'token': '',
+    }
+    try:
+        response = requests.get(request_host_url+'api/account/logout', params=params, headers=headers)
+        msg = response.json()
+        if msg['code'] == 0:
+            logging.info('try to logout, and logout succeed.')
+    except:
+        logging.info("try to logout, but logout failed.")
 
 def login_request(username, password) -> bool:
     if not is_net_ok():
+        log_out()
+        time.sleep(5)
         logging.info("your computer is offline，request now...")
         # password = "{B}" + base64.b64encode(password.encode()).decode()  # 加密
         nasId = getNasId()
@@ -61,6 +91,7 @@ def login_request(username, password) -> bool:
         host_ip = get_host_ip()
         logging.info("your host ip: "+host_ip)
 
+
 def is_net_ok() -> bool:
     try:
         status = session.get("https://www.baidu.com").status_code
@@ -71,6 +102,7 @@ def is_net_ok() -> bool:
     except Exception:
         return False
 
+
 def get_host_ip():
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -79,6 +111,7 @@ def get_host_ip():
     finally:
         s.close()
     return ip
+
 
 def get_user_ip(response_text):
 
@@ -96,6 +129,9 @@ def getNasId() -> int:
         'http://www.msftconnecttest.com/redirect?cmd=redirect')
     url = response.url
 
+    with open('request_host_url.txt', 'w') as f:
+        f.write(url)
+
     response = session.get(url + 'api/config')
     match_list = re.findall(r'"default_nas":"(.*?)"', response.text, re.S)
     if len(match_list) == 0:
@@ -107,6 +143,7 @@ def getNasId() -> int:
     requesr_url = url + '/api/account/login'
 
     return nasId
+
 
 def heading():
     str = r"""
@@ -124,7 +161,6 @@ if __name__ == "__main__":
     args = sys.argv
     username = args[1]
     password = args[2]
-
     while True:
         try:
             login_request(username, password)
