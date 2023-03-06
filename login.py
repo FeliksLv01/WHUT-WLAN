@@ -43,13 +43,14 @@ def log_out():
         msg = response.json()
         if msg['code'] == 0:
             logging.info('try to logout, and logout succeed.')
+            time.sleep(10)
     except:
         logging.info("try to logout, but logout failed.")
 
 def login_request(username, password) -> bool:
     if not is_net_ok():
         log_out()
-        time.sleep(5)
+        # time.sleep(5)
         logging.info("your computer is offline，request now...")
         # password = "{B}" + base64.b64encode(password.encode()).decode()  # 加密
         nasId = getNasId()
